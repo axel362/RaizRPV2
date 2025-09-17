@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Raiz RP — Reproduction</title>
+  <style>
+    :root{--bg:#0f1724;--card:#0b1220;--accent:#7c3aed;--muted:#94a3b8;--glass: rgba(255,255,255,0.03)}
+    *{box-sizing:border-box}
+    body{margin:0;font-family:Inter, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;color:#e6eef8;background:linear-gradient(180deg,#071020 0%, #051021 60%);min-height:100vh;}
+    .container{max-width:980px;margin:36px auto;padding:24px}
+    header{display:flex;align-items:center;gap:16px;justify-content:space-between}
+    .logo{width:64px;height:64px;border-radius:12px;background:linear-gradient(135deg,var(--accent),#06b6d4);display:flex;align-items:center;justify-content:center;color:white;font-weight:700;font-size:20px}
+    h1{margin:0;font-size:28px}
+    p.lead{color:var(--muted);margin:6px 0 18px}
+    .card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));padding:18px;border-radius:14px;box-shadow:0 6px 18px rgba(2,6,23,0.6);}
+    .grid{display:grid;grid-template-columns:1fr 360px;gap:18px;margin-top:18px}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}.container{padding:16px}}
+    .map-code{display:flex;align-items:center;gap:10px}
+    .code{background:var(--card);padding:10px 12px;border-radius:10px;font-family:monospace;color:#cfe9ff}
+    .btn{background:var(--accent);color:white;border:none;padding:10px 12px;border-radius:10px;cursor:pointer}
+    .features{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+    .feature{background:var(--glass);padding:10px 12px;border-radius:10px;color:var(--muted)}
+    form{display:flex;flex-direction:column;gap:10px}
+    label{font-size:13px;color:var(--muted)}
+    input, select, textarea{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#e6eef8}
+    textarea{min-height:120px;resize:vertical}
+    .socials{display:flex;gap:8px;margin-top:12px}
+    a.social{display:inline-block;padding:8px 10px;border-radius:8px;background:var(--card);text-decoration:none;color:var(--muted)}
+    footer{margin-top:22px;color:var(--muted);font-size:13px;text-align:center}
+
+    /* Modérateur ONLY styles */
+    #moderatorBtn{background:#ef4444;padding:10px 14px;border-radius:10px;color:#fff;font-weight:bold;cursor:pointer;border:none}
+    #moderatorPanel{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);align-items:flex-start;justify-content:center;overflow:auto;padding-top:60px}
+    #moderatorPanel .panel{background:var(--card);padding:20px;border-radius:12px;width:90%;max-width:900px}
+    #moderatorPanel h3{margin-top:0}
+    .request{background:rgba(255,255,255,0.05);padding:10px;border-radius:8px;margin-bottom:10px}
+    .request.open{border-left:4px solid #22c55e}
+    .request.closed{opacity:0.6;border-left:4px solid #ef4444}
+    .request button{margin-top:6px}
+
+    /* Chat window */
+    .chat-window{position:fixed;right:20px;bottom:20px;width:320px;background:var(--card);border-radius:12px;box-shadow:0 8px 30px rgba(2,6,23,0.6);overflow:hidden;display:flex;flex-direction:column}
+    .chat-header{padding:10px;background:linear-gradient(90deg,var(--accent),#06b6d4);color:white;font-weight:600;display:flex;justify-content:space-between;align-items:center}
+    .chat-messages{padding:10px;flex:1;overflow:auto;max-height:300px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)}
+    .msg{margin-bottom:8px;padding:8px;border-radius:8px;max-width:85%}
+    .msg.user{background:rgba(124,58,237,0.12);align-self:flex-start}
+    .msg.mod{background:rgba(6,182,212,0.12);align-self:flex-end}
+    .chat-input{display:flex;padding:10px;gap:8px}
+    .chat-input input{flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#e6eef8}
+    .small-btn{padding:6px 8px;border-radius:8px;border:none;cursor:pointer}
+
+    /* User chat launcher */
+    .user-chat-launch{margin-top:10px;display:flex;gap:8px}
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <div style="display:flex;align-items:center;gap:16px">
+        <div class="logo">RZ</div>
+        <div>
+          <h1>Raiz RP</h1>
+          <p class="lead">L'expérience Fortnite RP ultime — une ville vivante, une communauté soudée.</p>
+        </div>
+      </div>
+      <button id="moderatorBtn">Modérateur ONLY</button>
+    </header>
+
+    <div class="grid">
+      <main>
+        <section class="card">
+          <h2>Code de la map</h2>
+          <div class="map-code" style="margin-top:8px">
+            <div id="mapCode" class="code">1377-9191-9583</div>
+            <button class="btn" id="copyBtn">Copier</button>
+          </div>
+
+          <h3 style="margin-top:18px">Fonctionnalités de la map</h3>
+          <div class="features">
+            <div class="feature">Ville interactive et immersive</div>
+            <div class="feature">Métiers et emplois variés</div>
+            <div class="feature">Véhicules et garages personnalisés</div>
+            <div class="feature">Braquages et missions spéciales</div>
+            <div class="feature">Achat/vente de propriétés</div>
+            <div class="feature">Économie dynamique</div>
+            <div class="feature">Police et justice RP</div>
+            <div class="feature">Événements réguliers</div>
+            <div class="feature">Communauté active et bienveillante</div>
+            <div class="feature">Chat vocal intégré</div>
+            <div class="feature">Mises à jour fréquentes</div>
+          </div>
+
+          <div style="margin-top:16px">
+            <a class="social" href="https://youtube.com/@raizen_uefn" target="_blank">YouTube</a>
+            <a class="social" href="https://www.tiktok.com/@raizen_uefn" target="_blank">TikTok</a>
+            <a class="social" href="https://discord.gg/zZrr26799D" target="_blank">Discord</a>
+          </div>
+        </section>
+
+        <footer>Site reproduit à des fins d'exemple — personnalisez le contenu et les liens.</footer>
+      </main>
+
+      <aside>
+        <div class="card">
+          <h3>Contacte le staff</h3>
+          <form id="contactForm">
+            <div>
+              <label for="discord">Pseudo Discord *</label>
+              <input id="discord" name="discord" required placeholder="Ex : MonPseudo#1234" />
+            </div>
+            <div>
+              <label for="fortnite">Pseudo Fortnite *</label>
+              <input id="fortnite" name="fortnite" required placeholder="Ex : MonPseudo" />
+            </div>
+            <div>
+              <label for="categorie">Catégorie *</label>
+              <select id="categorie" name="categorie" required>
+                <option value="">Choisir une catégorie</option>
+                <option>Problème technique</option>
+                <option>Problème session</option>
+                <option>Signaler un joueur</option>
+                <option>Recrutement</option>
+                <option>Autre</option>
+              </select>
+            </div>
+            <div>
+              <label for="message">Votre demande *</label>
+              <textarea id="message" name="message" required placeholder="Décris ton problème ou ta demande..."></textarea>
+            </div>
+            <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+              <button type="reset" class="btn" style="background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)">Réinitialiser</button>
+              <button type="submit" class="btn">Envoyer</button>
+            </div>
+          </form>
+
+          <div class="user-chat-launch">
+            <input id="launchDiscord" placeholder="Ouvrir mon chat (Pseudo Discord)" />
+            <button id="openUserChat" class="small-btn">Ouvrir</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- Modérateur Panel -->
+  <div id="moderatorPanel">
+    <div class="panel">
+      <h3>Demandes reçues</h3>
+      <div id="requestsList"></div>
+      <div style="text-align:right">
+        <button class="btn" id="closePanel" style="background:#6b7280">Fermer</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="chatContainer"></div>
+
+  <script>
+    // Mot de passe modérateur
+    const MOD_PASSWORD = 'RaizMod2025!';
+    let requests = JSON.parse(localStorage.getItem('requests') || '[]');
+
+    function saveRequests(){
+      localStorage.setItem('requests', JSON.stringify(requests));
+    }
+
+    document.getElementById('copyBtn').addEventListener('click', async function(){
+      const code = document.getElementById('mapCode').textContent.trim();
+      try{
+        await navigator.clipboard.writeText(code);
+        this.textContent = 'Copié !';
+        setTimeout(()=> this.textContent = 'Copier', 1400);
+      }catch(e){
+        alert('Impossible de copier automatiquement — copie manuelle : ' + code);
+      }
+    });
+
+    document.getElementById('contactForm').addEventListener('submit', function(e){
+      e.preventDefault();
+      const discord = document.getElementById('discord').value.trim();
+      const fortnite = document.getElementById('fortnite').value.trim();
+      const categorie = document.getElementById('categorie').value;
+      const message = document.getElementById('message').value.trim();
+
+      const request = { discord, fortnite, categorie, message, date: new Date().toLocaleString(), status: 'open', chats: [] };
+      requests.push(request);
+      saveRequests();
+
+      alert('Votre demande a bien été envoyée au staff !');
+      this.reset();
+    });
+
+    // Render requests in panel
+    function renderRequests(){
+      const requestsList = document.getElementById('requestsList');
+      requestsList.innerHTML = requests.length ? '' : '<p>Aucune demande reçue.</p>';
+      requests.forEach((r, index) => {
+        const div = document.createElement('div');
+        div.className = 'request ' + (r.status === 'open' ? 'open' : 'closed');
+        div.innerHTML = `<strong>${r.discord}</strong> (${r.fortnite})<br/><em>${r.categorie}</em> - ${r.date}<br/>${r.message}`;
+
+        const btnClose = document.createElement('button');
+        btnClose.className = 'btn';
+        btnClose.style.background = r.status === 'open' ? '#ef4444' : '#22c55e';
+        btnClose.textContent = r.status === 'open' ? 'Fermer' : 'Réouvrir';
+        btnClose.addEventListener('click', ()=>{
+          requests[index].status = r.status === 'open' ? 'closed' : 'open';
+          saveRequests();
+          renderRequests();
+        });
+
+        const btnChat = document.createElement('button');
+        btnChat.className = 'btn';
+        btnChat.style.marginLeft = '8px';
+        btnChat.textContent = 'Démarrer discussion';
+        btnChat.addEventListener('click', ()=>{
+          openChatWindow(index, 'mod');
+        });
+
+        div.appendChild(btnClose);
+        div.appendChild(btnChat);
+        requestsList.appendChild(div);
+      });
+    }
+
+    // Chat UI
+    const chatContainer = document.getElementById('chatContainer');
+    function openChatWindow(requestIndex, role, userDiscord){
+      // role: 'mod' or 'user'
+      const r = requests[requestIndex];
+      const id = 'chat-'+requestIndex;
+      if(document.getElementById(id)) return; // déjà ouvert
+
+      const win = document.createElement('div');
+      win.className = 'chat-window';
+      win.id = id;
+
+      const header = document.createElement('div');
+      header.className = 'chat-header';
+      header.innerHTML = `<span>${r.discord} — ${r.categorie}</span>`;
+
+      const close = document.createElement('button');
+      close.className = 'small-btn';
+      close.textContent = '✕';
+      close.addEventListener('click', ()=>{ win.remove(); });
+      header.appendChild(close);
+
+      const messages = document.createElement('div');
+      messages.className = 'chat-messages';
+
+      const inputWrap = document.createElement('div');
+      inputWrap.className = 'chat-input';
+      const input = document.createElement('input');
+      input.placeholder = 'Écrire un message...';
+      const send = document.createElement('button');
+      send.className = 'small-btn';
+      send.textContent = 'Envoyer';
+      inputWrap.appendChild(input);
+      inputWrap.appendChild(send);
+
+      win.appendChild(header);
+      win.appendChild(messages);
+      win.appendChild(inputWrap);
+      chatContainer.appendChild(win);
+
+      function renderMessages(){
+        messages.innerHTML = '';
+        r.chats.forEach(c => {
+          const m = document.createElement('div');
+          m.className = 'msg ' + (c.sender === 'mod' ? 'mod' : 'user');
+          m.innerHTML = `<strong>${c.sender === 'mod' ? 'Modérateur' : r.discord}</strong><br/><small>${c.time}</small><div>${c.text}</div>`;
+          messages.appendChild(m);
+        });
+        messages.scrollTop = messages.scrollHeight;
+      }
+
+      renderMessages();
+
+      send.addEventListener('click', ()=>{
+        const text = input.value.trim();
+        if(!text) return;
+        const sender = role === 'mod' ? 'mod' : 'user';
+        const chatMsg = { sender, text, time: new Date().toLocaleTimeString() };
+        r.chats.push(chatMsg);
+        saveRequests();
+        renderMessages();
+        input.value = '';
+      });
+
+      // Allow Enter key
+      input.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); send.click(); } });
+    }
+
+    // User can open their chat by entering their Discord pseudo
+    document.getElementById('openUserChat').addEventListener('click', ()=>{
+      const discord = document.getElementById('launchDiscord').value.trim();
+      if(!discord){ alert('Indique ton pseudo Discord pour ouvrir ton chat.'); return; }
+      // find last request by this discord
+      const index = requests.map(r=>r.discord.toLowerCase()).lastIndexOf(discord.toLowerCase());
+      if(index === -1){ alert('Aucune demande trouvée pour ce pseudo.'); return; }
+      openChatWindow(index, 'user');
+    });
+
+    // Modérateur Panel logic
+    const moderatorBtn = document.getElementById('moderatorBtn');
+    const moderatorPanel = document.getElementById('moderatorPanel');
+    const closePanel = document.getElementById('closePanel');
+
+    moderatorBtn.addEventListener('click', ()=>{
+      const input = prompt('Entrer le mot de passe modérateur :');
+      if(input === null) return;
+      if(input === MOD_PASSWORD){
+        renderRequests();
+        moderatorPanel.style.display = 'flex';
+      }else{
+        alert('Mot de passe incorrect.');
+      }
+    });
+
+    closePanel.addEventListener('click', ()=>{
+      moderatorPanel.style.display = 'none';
+    });
+
+    // initial render
+    renderRequests();
+  </script>
+</body>
+</html>
