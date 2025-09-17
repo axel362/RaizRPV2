@@ -26,32 +26,24 @@
     input, select, textarea{padding:10px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#e6eef8}
     textarea{min-height:120px;resize:vertical}
     .socials{display:flex;gap:8px;margin-top:12px}
-    a.social{display:inline-block;padding:8px 10px;border-radius:8px;background:var(--card);text-decoration:none;color:var(--muted)}
+    a.social{display:inline-flex;align-items:center;gap:6px;padding:8px 10px;border-radius:8px;background:var(--card);text-decoration:none;color:var(--muted)}
     footer{margin-top:22px;color:var(--muted);font-size:13px;text-align:center}
 
     /* Modérateur ONLY styles */
     #moderatorBtn{background:#ef4444;padding:10px 14px;border-radius:10px;color:#fff;font-weight:bold;cursor:pointer;border:none}
-    #moderatorPanel{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);align-items:flex-start;justify-content:center;overflow:auto;padding-top:60px}
-    #moderatorPanel .panel{background:var(--card);padding:20px;border-radius:12px;width:90%;max-width:900px}
+    #moderatorPanel{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);align-items:flex-start;justify-content:center;overflow:auto;padding-top:60px;z-index:1000}
+    #moderatorPanel .panel{background:var(--card);padding:20px;border-radius:12px;width:90%;max-width:800px}
     #moderatorPanel h3{margin-top:0}
+    .tabs{display:flex;gap:10px;margin-bottom:12px}
+    .tab-btn{flex:1;padding:10px;border:none;border-radius:8px;cursor:pointer;background:#1e293b;color:#e6eef8}
+    .tab-btn.active{background:var(--accent)}
+    .tab-content{display:none}
+    .tab-content.active{display:block}
     .request{background:rgba(255,255,255,0.05);padding:10px;border-radius:8px;margin-bottom:10px}
     .request.open{border-left:4px solid #22c55e}
     .request.closed{opacity:0.6;border-left:4px solid #ef4444}
     .request button{margin-top:6px}
-
-    /* Chat window */
-    .chat-window{position:fixed;right:20px;bottom:20px;width:320px;background:var(--card);border-radius:12px;box-shadow:0 8px 30px rgba(2,6,23,0.6);overflow:hidden;display:flex;flex-direction:column}
-    .chat-header{padding:10px;background:linear-gradient(90deg,var(--accent),#06b6d4);color:white;font-weight:600;display:flex;justify-content:space-between;align-items:center}
-    .chat-messages{padding:10px;flex:1;overflow:auto;max-height:300px;background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent)}
-    .msg{margin-bottom:8px;padding:8px;border-radius:8px;max-width:85%}
-    .msg.user{background:rgba(124,58,237,0.12);align-self:flex-start}
-    .msg.mod{background:rgba(6,182,212,0.12);align-self:flex-end}
-    .chat-input{display:flex;padding:10px;gap:8px}
-    .chat-input input{flex:1;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.04);background:transparent;color:#e6eef8}
-    .small-btn{padding:6px 8px;border-radius:8px;border:none;cursor:pointer}
-
-    /* User chat launcher */
-    .user-chat-launch{margin-top:10px;display:flex;gap:8px}
+    .ban-entry{margin-bottom:8px}
   </style>
 </head>
 <body>
@@ -91,11 +83,22 @@
             <div class="feature">Mises à jour fréquentes</div>
           </div>
 
-          <div style="margin-top:16px">
-            <a class="social" href="https://youtube.com/@raizen_uefn" target="_blank">YouTube</a>
-            <a class="social" href="https://www.tiktok.com/@raizen_uefn" target="_blank">TikTok</a>
-            <a class="social" href="https://discord.gg/zZrr26799D" target="_blank">Discord</a>
+          <div style="margin-top:16px" class="socials">
+            <a class="social" href="https://youtube.com/@TonChaine" target="_blank">
+              ▶️ YouTube
+            </a>
+            <a class="social" href="https://www.tiktok.com/@TonCompte" target="_blank">
+              🎵 TikTok
+            </a>
+            <a class="social" href="https://discord.gg/TonInvite" target="_blank">
+              🌀 Discord
+            </a>
           </div>
+        </section>
+
+        <section class="card" style="margin-top:18px">
+          <h3>Blacklist</h3>
+          <div id="blacklistList"></div>
         </section>
 
         <footer>Site reproduit à des fins d'exemple — personnalisez le contenu et les liens.</footer>
@@ -133,11 +136,6 @@
               <button type="submit" class="btn">Envoyer</button>
             </div>
           </form>
-
-          <div class="user-chat-launch">
-            <input id="launchDiscord" placeholder="Ouvrir mon chat (Pseudo Discord)" />
-            <button id="openUserChat" class="small-btn">Ouvrir</button>
-          </div>
         </div>
       </aside>
     </div>
@@ -146,24 +144,46 @@
   <!-- Modérateur Panel -->
   <div id="moderatorPanel">
     <div class="panel">
-      <h3>Demandes reçues</h3>
-      <div id="requestsList"></div>
-      <div style="text-align:right">
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="mod">Modération</button>
+        <button class="tab-btn" data-tab="cmd">Commandes</button>
+      </div>
+
+      <div id="mod" class="tab-content active">
+        <h3>Demandes reçues</h3>
+        <div id="requestsList"></div>
+      </div>
+
+      <div id="cmd" class="tab-content">
+        <h3>Commandes staff</h3>
+        <button class="btn" id="clearRequests" style="background:#ef4444;margin-bottom:8px">Supprimer toutes les demandes</button>
+        <button class="btn" id="exportRequests" style="background:#06b6d4;margin-bottom:16px">Exporter les demandes</button>
+        
+        <h4>Blacklist</h4>
+        <div class="ban-entry">
+          <input id="banDiscord" placeholder="Pseudo Discord" />
+        </div>
+        <div class="ban-entry">
+          <input id="banFortnite" placeholder="Pseudo Fortnite" />
+        </div>
+        <div class="ban-entry">
+          <input id="banRaison" placeholder="Raison du ban" />
+        </div>
+        <button class="btn" id="addBan" style="margin-bottom:8px">Ajouter à la Blacklist</button>
+        <button class="btn" id="removeBan" style="background:#ef4444">Retirer de la Blacklist</button>
+      </div>
+
+      <div style="text-align:right;margin-top:16px">
         <button class="btn" id="closePanel" style="background:#6b7280">Fermer</button>
       </div>
     </div>
   </div>
 
-  <div id="chatContainer"></div>
-
   <script>
     // Mot de passe modérateur
     const MOD_PASSWORD = 'RaizMod2025!';
     let requests = JSON.parse(localStorage.getItem('requests') || '[]');
-
-    function saveRequests(){
-      localStorage.setItem('requests', JSON.stringify(requests));
-    }
+    let blacklist = JSON.parse(localStorage.getItem('blacklist') || '[]');
 
     document.getElementById('copyBtn').addEventListener('click', async function(){
       const code = document.getElementById('mapCode').textContent.trim();
@@ -178,14 +198,14 @@
 
     document.getElementById('contactForm').addEventListener('submit', function(e){
       e.preventDefault();
-      const discord = document.getElementById('discord').value.trim();
-      const fortnite = document.getElementById('fortnite').value.trim();
+      const discord = document.getElementById('discord').value;
+      const fortnite = document.getElementById('fortnite').value;
       const categorie = document.getElementById('categorie').value;
-      const message = document.getElementById('message').value.trim();
+      const message = document.getElementById('message').value;
 
-      const request = { discord, fortnite, categorie, message, date: new Date().toLocaleString(), status: 'open', chats: [] };
+      const request = { discord, fortnite, categorie, message, date: new Date().toLocaleString(), status: 'open' };
       requests.push(request);
-      saveRequests();
+      localStorage.setItem('requests', JSON.stringify(requests));
 
       alert('Votre demande a bien été envoyée au staff !');
       this.reset();
@@ -199,108 +219,32 @@
         const div = document.createElement('div');
         div.className = 'request ' + (r.status === 'open' ? 'open' : 'closed');
         div.innerHTML = `<strong>${r.discord}</strong> (${r.fortnite})<br/><em>${r.categorie}</em> - ${r.date}<br/>${r.message}`;
-
-        const btnClose = document.createElement('button');
-        btnClose.className = 'btn';
-        btnClose.style.background = r.status === 'open' ? '#ef4444' : '#22c55e';
-        btnClose.textContent = r.status === 'open' ? 'Fermer' : 'Réouvrir';
-        btnClose.addEventListener('click', ()=>{
+        const btn = document.createElement('button');
+        btn.className = 'btn';
+        btn.style.background = r.status === 'open' ? '#ef4444' : '#22c55e';
+        btn.textContent = r.status === 'open' ? 'Fermer' : 'Réouvrir';
+        btn.addEventListener('click', ()=>{
           requests[index].status = r.status === 'open' ? 'closed' : 'open';
-          saveRequests();
+          localStorage.setItem('requests', JSON.stringify(requests));
           renderRequests();
         });
-
-        const btnChat = document.createElement('button');
-        btnChat.className = 'btn';
-        btnChat.style.marginLeft = '8px';
-        btnChat.textContent = 'Démarrer discussion';
-        btnChat.addEventListener('click', ()=>{
-          openChatWindow(index, 'mod');
-        });
-
-        div.appendChild(btnClose);
-        div.appendChild(btnChat);
+        div.appendChild(btn);
         requestsList.appendChild(div);
       });
     }
 
-    // Chat UI
-    const chatContainer = document.getElementById('chatContainer');
-    function openChatWindow(requestIndex, role, userDiscord){
-      // role: 'mod' or 'user'
-      const r = requests[requestIndex];
-      const id = 'chat-'+requestIndex;
-      if(document.getElementById(id)) return; // déjà ouvert
-
-      const win = document.createElement('div');
-      win.className = 'chat-window';
-      win.id = id;
-
-      const header = document.createElement('div');
-      header.className = 'chat-header';
-      header.innerHTML = `<span>${r.discord} — ${r.categorie}</span>`;
-
-      const close = document.createElement('button');
-      close.className = 'small-btn';
-      close.textContent = '✕';
-      close.addEventListener('click', ()=>{ win.remove(); });
-      header.appendChild(close);
-
-      const messages = document.createElement('div');
-      messages.className = 'chat-messages';
-
-      const inputWrap = document.createElement('div');
-      inputWrap.className = 'chat-input';
-      const input = document.createElement('input');
-      input.placeholder = 'Écrire un message...';
-      const send = document.createElement('button');
-      send.className = 'small-btn';
-      send.textContent = 'Envoyer';
-      inputWrap.appendChild(input);
-      inputWrap.appendChild(send);
-
-      win.appendChild(header);
-      win.appendChild(messages);
-      win.appendChild(inputWrap);
-      chatContainer.appendChild(win);
-
-      function renderMessages(){
-        messages.innerHTML = '';
-        r.chats.forEach(c => {
-          const m = document.createElement('div');
-          m.className = 'msg ' + (c.sender === 'mod' ? 'mod' : 'user');
-          m.innerHTML = `<strong>${c.sender === 'mod' ? 'Modérateur' : r.discord}</strong><br/><small>${c.time}</small><div>${c.text}</div>`;
-          messages.appendChild(m);
-        });
-        messages.scrollTop = messages.scrollHeight;
-      }
-
-      renderMessages();
-
-      send.addEventListener('click', ()=>{
-        const text = input.value.trim();
-        if(!text) return;
-        const sender = role === 'mod' ? 'mod' : 'user';
-        const chatMsg = { sender, text, time: new Date().toLocaleTimeString() };
-        r.chats.push(chatMsg);
-        saveRequests();
-        renderMessages();
-        input.value = '';
+    // Render blacklist
+    function renderBlacklist(){
+      const list = document.getElementById('blacklistList');
+      list.innerHTML = blacklist.length ? '' : '<p>Aucun joueur banni.</p>';
+      blacklist.forEach((b) => {
+        const div = document.createElement('div');
+        div.className = 'request closed';
+        div.innerHTML = `<strong style="color:#ef4444">[Banni]</strong> ${b.discord} (${b.fortnite})<br/><em>${b.raison}</em>`;
+        list.appendChild(div);
       });
-
-      // Allow Enter key
-      input.addEventListener('keydown', (e)=>{ if(e.key === 'Enter'){ e.preventDefault(); send.click(); } });
     }
-
-    // User can open their chat by entering their Discord pseudo
-    document.getElementById('openUserChat').addEventListener('click', ()=>{
-      const discord = document.getElementById('launchDiscord').value.trim();
-      if(!discord){ alert('Indique ton pseudo Discord pour ouvrir ton chat.'); return; }
-      // find last request by this discord
-      const index = requests.map(r=>r.discord.toLowerCase()).lastIndexOf(discord.toLowerCase());
-      if(index === -1){ alert('Aucune demande trouvée pour ce pseudo.'); return; }
-      openChatWindow(index, 'user');
-    });
+    renderBlacklist();
 
     // Modérateur Panel logic
     const moderatorBtn = document.getElementById('moderatorBtn');
@@ -312,6 +256,7 @@
       if(input === null) return;
       if(input === MOD_PASSWORD){
         renderRequests();
+        renderBlacklist();
         moderatorPanel.style.display = 'flex';
       }else{
         alert('Mot de passe incorrect.');
@@ -322,8 +267,58 @@
       moderatorPanel.style.display = 'none';
     });
 
-    // initial render
-    renderRequests();
+    // Onglets
+    document.querySelectorAll('.tab-btn').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById(btn.dataset.tab).classList.add('active');
+      });
+    });
+
+    // Commandes
+    document.getElementById('clearRequests').addEventListener('click', ()=>{
+      if(confirm("Supprimer toutes les demandes ?")){
+        requests = [];
+        localStorage.setItem('requests', JSON.stringify(requests));
+        renderRequests();
+      }
+    });
+
+    document.getElementById('exportRequests').addEventListener('click', ()=>{
+      const data = JSON.stringify(requests, null, 2);
+      const blob = new Blob([data], {type:"application/json"});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = "demandes.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    });
+
+    document.getElementById('addBan').addEventListener('click', ()=>{
+      const discord = document.getElementById('banDiscord').value.trim();
+      const fortnite = document.getElementById('banFortnite').value.trim();
+      const raison = document.getElementById('banRaison').value.trim();
+      if(!discord || !fortnite || !raison){ alert("Remplis tous les champs."); return; }
+      blacklist.push({discord, fortnite, raison});
+      localStorage.setItem('blacklist', JSON.stringify(blacklist));
+      renderBlacklist();
+      alert("Le joueur a été ajouté à la blacklist !");
+      document.getElementById('banDiscord').value='';
+      document.getElementById('banFortnite').value='';
+      document.getElementById('banRaison').value='';
+    });
+
+    document.getElementById('removeBan').addEventListener('click', ()=>{
+      const discord = prompt("Entrer le pseudo Discord à retirer de la blacklist :");
+      if(!discord) return;
+      blacklist = blacklist.filter(b => b.discord !== discord);
+      localStorage.setItem('blacklist', JSON.stringify(blacklist));
+      renderBlacklist();
+      alert("Le joueur a été retiré de la blacklist.");
+    });
   </script>
 </body>
 </html>
